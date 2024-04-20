@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes');
 const { swaggerUi, specs } = require('./swagger');
-
+const { logger } = require('./logger')
 
 // Load environment variables from .env file
 dotenv.config();
@@ -30,5 +30,5 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  logger.info(`Server is running on port ${PORT}`);
 });

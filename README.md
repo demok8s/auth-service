@@ -1,6 +1,3 @@
-Sure, here's a basic `README.md` file for your `auth-service` project with installation steps:
-
-
 # auth-service
 
 This is the authentication service microservice.
@@ -47,9 +44,3 @@ To install and run this microservice locally, follow these steps:
 - **Check if user exists:** `POST /auth/check-user`
 - **Reset user password:** `POST /auth/reset-password`
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-```
-
-Feel free to customize the instructions and add any additional details as needed.

@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { verifyToken } = require('../middleware/middleware')
+const { logger } = require('../logger')
 // Route for user registration
 router.post('/register', async (req, res) => {
   try {
@@ -25,7 +26,7 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json(newUser);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'An error occurred while registering user.' });
   }
 });
@@ -52,7 +53,7 @@ router.post('/login', async (req, res) => {
 
     res.status(200).json({ token });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'An error occurred while logging in.' });
   }
 });
@@ -61,15 +62,16 @@ router.post('/login', async (req, res) => {
 // Route to get user ID
 router.get('/user-id', verifyToken, async (req, res) => {
     try {
-      const user = await User.findById(req.userId);
-  
+      
+      const user = await User.findById(req.query.user_id);
+       
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
   
       res.status(200).json({ userId: user._id });
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       res.status(500).json({ message: 'An error occurred while getting user ID' });
     }
   });
@@ -85,7 +87,7 @@ router.get('/user-id', verifyToken, async (req, res) => {
         return res.status(200).json({ exists: false });
       }
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       res.status(500).json({ message: 'An error occurred while checking user existence' });
     }
   });
@@ -107,10 +109,29 @@ router.get('/user-id', verifyToken, async (req, res) => {
   
       return res.status(200).json({ password_reset: true });
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       res.status(500).json({ message: 'An error occurred while resetting password' });
     }
   });
+
+
+// Route to validate JWT token
+router.post('/validate-user',verifyToken, (req, res) => {
+    const token = req.body.token;
+  
+    if (!token) {
+      return res.status(400).json({ message: 'Token is required' });
+    }
+  
+    try {
+      jwt.verify(token, process.env.JWT_SECRET);
+      res.status(200).json({ isValid: true });
+    } catch (error) {
+      logger.error(error);
+      res.status(401).json({ isValid: false });
+    }
+  });
+  
 
 module.exports = router;
 
@@ -258,6 +279,41 @@ module.exports = router;
  *               properties:
  *                 password_reset:
  *                   type: boolean
+ *       '500':
+ *         description: Internal server error
+ */
+/**
+ * @swagger
+ * /auth/validate-user:
+ *   post:
+ *     summary: Validate JWT token
+ *     description: Validate the provided JWT token to check its authenticity.
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: JWT token to validate
+ *     responses:
+ *       '200':
+ *         description: Token is valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 isValid:
+ *                   type: boolean
+ *                   description: Indicates whether the token is valid or not
+ *       '400':
+ *         description: Bad request, token is required
+ *       '401':
+ *         description: Unauthorized, token is invalid
  *       '500':
  *         description: Internal server error
  */
