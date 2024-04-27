@@ -10,6 +10,11 @@ const { logger } = require('../logger')
 // Route for user registration
 router.post('/register', async (req, res) => {
   try {
+    const checkUser = await User.findOne({ email: req.body.email });
+    if (checkUser) {
+      return res.status(404).json({ message: 'User already exists' });
+    }
+
     // Hash the password
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
@@ -36,9 +41,9 @@ router.post('/login', async (req, res) => {
   try {
     // Find the user by email
     const user = await User.findOne({ email: req.body.email });
-
+    logger.info(req.body)
     if (!user) {
-      return res.status(404).json({ message: 'User not found.' });
+      return res.status(404).json({ message: 'Invalid credentials' });
     }
 
     // Compare passwords
