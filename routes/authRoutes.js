@@ -56,7 +56,7 @@ router.post('/login', async (req, res) => {
     // Generate JWT token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.status(200).json({ token });
+    res.status(200).json({"token": token, "userdata": user });
   } catch (error) {
     logger.error(error);
     res.status(500).json({ message: 'An error occurred while logging in.' });
@@ -103,16 +103,16 @@ router.get('/user-id', verifyToken, async (req, res) => {
       const user = await User.findOne({ email: req.body.email });
   
       if (!user) {
-        return res.status(200).json({ password_reset: false });
+        return res.status(404).json({ message: "User not found!! please check the email" });
       }
   
-      const newPassword = 'your_new_password'; // Generate or receive new password here
+      const newPassword = req.body.password; // Generate or receive new password here
       const hashedPassword = await bcrypt.hash(newPassword, 10);
   
       user.password = hashedPassword;
       await user.save();
   
-      return res.status(200).json({ password_reset: true });
+      return res.status(200).json({ message: `Password has been reset for ${user.email}` });
     } catch (error) {
       logger.error(error);
       res.status(500).json({ message: 'An error occurred while resetting password' });

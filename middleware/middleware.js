@@ -6,7 +6,6 @@ const { logger } = require('../logger')
 // verify token middleware
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization;
-  logger.info(req.headers.authorization)
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
